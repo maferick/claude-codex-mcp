@@ -1,0 +1,5 @@
+.smoke-tmp/
+.error-tmp/
+.agent-collab/
+node_modules/
+*.log

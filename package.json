@@ -1,0 +1,18 @@
+{
+  "name": "agent-collab-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "agent-collab-mcp": "./src/index.mjs"
+  },
+  "scripts": {
+    "start": "node ./src/index.mjs",
+    "check": "node --check ./src/index.mjs",
+    "smoke": "node ./scripts/smoke-test.mjs",
+    "test:errors": "node ./scripts/error-test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
