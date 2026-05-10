@@ -6,7 +6,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const MODES = {
   review:
     "You are reviewing the included material for bugs, edge cases, and detail issues. Be terse. Cite file:line. Don't restate what the code does.",
@@ -18,6 +18,8 @@ const MODES = {
     "You are reviewing user-facing behavior. Focus on user-visible issues, naming, error messages, and edge interactions.",
   architecture:
     "Sanity-check an architectural choice. Surface load-bearing assumptions and failure modes.",
+  security:
+    "You are doing a security review. Walk the OWASP Top 10 mentally (injection, broken auth/session, broken access control, security misconfig, sensitive data exposure, vulnerable deps, SSRF, XSS / CSRF, insecure design, security logging) plus framework-specific traps for the stack at hand. For each finding: cite file:line, name the OWASP/CWE category, classify severity (critical / high / medium / low / info), and propose the smallest concrete fix. Do not restate what the code does. Be terse; one paragraph per finding maximum. If a category clearly does not apply, skip it -- do not enumerate negatives.",
 };
 
 const DEFAULTS = {
@@ -626,7 +628,22 @@ function toolDefinitions() {
   return [
     {
       name: "consult",
-      description: "Ask the other agent for a synchronous one-shot consult using optional files and git diff.",
+      description:
+        "Ask the other agent for a synchronous one-shot consult using optional files and git diff.\n" +
+        "\n" +
+        "Workflow expectation (since v0.2.0): for any non-trivial architectural decision, " +
+        "use the double-consult pattern. First consult with mode='architecture' or 'plan' to " +
+        "surface load-bearing assumptions; interpret what came back; then consult AGAIN with the " +
+        "refined plan (citing the prior consult_id) BEFORE writing code. Don't shortcut from " +
+        "one consult straight to implementation.\n" +
+        "\n" +
+        "When changes touch authentication, authorization, file I/O, user input, secrets, sessions, " +
+        "uploads, deserialisation, network calls to user-controlled hosts, or any persisted data " +
+        "that crosses a trust boundary, include a mode='security' consult before merging. Default " +
+        "to running it on any user-facing surface change.\n" +
+        "\n" +
+        "Modes: review (line-level), plan (steps + tradeoffs), debug (hypotheses), ux (user-visible " +
+        "behavior), architecture (assumptions + failure modes), security (OWASP-framed).",
       inputSchema: {
         type: "object",
         additionalProperties: false,
