@@ -67,6 +67,8 @@ Command overrides are split on simple shell-like whitespace and quotes. They are
 
 Storage is append-only JSONL at `<project_root>/.agent-collab/log.jsonl` unless `AGENT_COLLAB_DIR` overrides it. Consult logs include prompt and response text, but only file paths are logged, not file contents.
 
+Consult subprocesses run with their working directory set to the resolved project root. Set `AGENT_COLLAB_PROJECT_ROOT` when launching from tools that use a different process cwd.
+
 ## Example Tool Calls
 
 Ask the other agent for a review:

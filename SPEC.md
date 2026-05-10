@@ -140,6 +140,7 @@ Notes:
 
 - Confirmed: `codex exec -` reads instructions from stdin (codex-cli 0.130.0-alpha.5 verified).
 - `claude` may not be on PATH from every shell. Treat the Claude command as install-time configuration: the README must walk the user through verifying `claude -p "ping"` works from their shell, and falling back to `AGENT_COLLAB_CLAUDE_CMD` with the absolute path if not.
+- Subprocesses run with `cwd` set to the resolved project root so CLIs see the correct repository trust context and relative paths.
 - stderr is captured and included in log only; not returned to caller unless exit code is non-zero, in which case it's surfaced in the error response (last 4 KiB).
 
 ---

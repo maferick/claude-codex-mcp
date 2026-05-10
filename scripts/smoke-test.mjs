@@ -12,7 +12,7 @@ await fs.mkdir(testRoot, { recursive: true });
 await fs.writeFile(path.join(testRoot, "sample.txt"), "hello from sample\n", "utf8");
 await fs.writeFile(
   echoAgentPath,
-  "let d=''; process.stdin.on('data', c => d += c); process.stdin.on('end', () => { process.stderr.write('note from echo agent'); process.stdout.write('ECHO:' + d); });\n",
+  "let d=''; process.stdin.on('data', c => d += c); process.stdin.on('end', () => { process.stderr.write('note from echo agent'); process.stdout.write('CWD:' + process.cwd() + '\\nECHO:' + d); });\n",
   "utf8",
 );
 
@@ -73,6 +73,9 @@ try {
   const consult = JSON.parse(messages.find((entry) => entry.id === 5).result.content[0].text);
   if (!consult.response.includes("ECHO:") || !consult.response.includes("hello from sample")) {
     throw new Error("Consult response did not include echoed prompt and file content");
+  }
+  if (!consult.response.includes(`CWD:${testRoot}`)) {
+    throw new Error(`Consult subprocess should run from project root ${testRoot}: ${consult.response}`);
   }
 
   const context = JSON.parse(messages.find((entry) => entry.id === 6).result.content[0].text);

@@ -149,7 +149,7 @@ async function consult(args) {
 
   try {
     prompt = await assemblePrompt({ root, question: args.question, files, includeGitDiff, mode, settings });
-    const subprocess = await runTarget(target, prompt, settings);
+    const subprocess = await runTarget(target, prompt, settings, root);
     response = truncateUtf8(subprocess.stdout, settings.maxResponseBytes);
     truncated = Buffer.byteLength(subprocess.stdout, "utf8") > settings.maxResponseBytes;
     stderrTail = subprocess.stderr ? tailBytes(subprocess.stderr, 4096) : undefined;
@@ -320,7 +320,7 @@ function runGitDiff(root) {
   });
 }
 
-async function runTarget(target, prompt, settings) {
+async function runTarget(target, prompt, settings, root) {
   const command = target === "codex" ? settings.codexCmd : settings.claudeCmd;
   const [file, ...args] = splitCommand(command);
   if (!file) {
@@ -336,7 +336,12 @@ async function runTarget(target, prompt, settings) {
     let child;
 
     try {
-      child = spawn(commandSpec.file, commandSpec.args, { stdio: ["pipe", "pipe", "pipe"], windowsHide: true, shell: commandSpec.shell });
+      child = spawn(commandSpec.file, commandSpec.args, {
+        cwd: root,
+        stdio: ["pipe", "pipe", "pipe"],
+        windowsHide: true,
+        shell: commandSpec.shell,
+      });
     } catch (error) {
       resolve({ stdout: "", stderr: "", error: `${target} CLI not found on PATH; set AGENT_COLLAB_${target.toUpperCase()}_CMD` });
       return;
