@@ -6,7 +6,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 const MODES = {
   review:
     "You are reviewing the included material for bugs, edge cases, and detail issues. Be terse. Cite file:line. Don't restate what the code does.",
@@ -20,6 +20,10 @@ const MODES = {
     "Sanity-check an architectural choice. Surface load-bearing assumptions and failure modes.",
   security:
     "You are doing a security review. Walk the OWASP Top 10 mentally (injection, broken auth/session, broken access control, security misconfig, sensitive data exposure, vulnerable deps, SSRF, XSS / CSRF, insecure design, security logging) plus framework-specific traps for the stack at hand. For each finding: cite file:line, name the OWASP/CWE category, classify severity (critical / high / medium / low / info), and propose the smallest concrete fix. Do not restate what the code does. Be terse; one paragraph per finding maximum. If a category clearly does not apply, skip it -- do not enumerate negatives.",
+  quality:
+    "You are reviewing for code quality and programming best practices -- the non-security counterpart of security review. Look at: error handling (bare except, swallowed errors, missing rollbacks, retry policy gaps), async correctness (missing awaits, blocking calls inside async, session lifecycle), idiom (Pythonic / FastAPI / SQLAlchemy 2.0 / pydantic v2 patterns), simplicity (dead code, redundant branches, premature abstraction, magic numbers, over-engineering), API design (consistency, breaking-change risk, naming), testing gaps (paths that should have a test but don't), and operational hygiene (logging at the right level, structured context, no PII / secrets in logs, observability). For each finding: cite file:line, category (one of: error-handling, async, idiom, simplicity, api-design, testing, observability, performance, other), severity (critical / high / medium / low / info -- using a maintainability lens, not exploitability), and the smallest concrete fix. Skip non-applicable categories. Do not restate what the code does.",
+  audit:
+    "You are doing a combined security + quality audit pass on the included code. Find issues under BOTH lenses in one read. Tag each finding clearly: `kind: security` or `kind: quality`. For security findings use the OWASP/CWE framing and severity scale from the `security` mode. For quality findings use the maintainability scale from the `quality` mode. Cite file:line. Be terse. Skip non-applicable categories. Don't restate what the code does. If a finding is BOTH security and quality (e.g. swallowed exception in a security-relevant code path), tag it `kind: security` and mention the quality dimension in the fix.",
 };
 
 const DEFAULTS = {
@@ -637,13 +641,16 @@ function toolDefinitions() {
         "refined plan (citing the prior consult_id) BEFORE writing code. Don't shortcut from " +
         "one consult straight to implementation.\n" +
         "\n" +
-        "When changes touch authentication, authorization, file I/O, user input, secrets, sessions, " +
-        "uploads, deserialisation, network calls to user-controlled hosts, or any persisted data " +
-        "that crosses a trust boundary, include a mode='security' consult before merging. Default " +
-        "to running it on any user-facing surface change.\n" +
+        "Before merging any user-facing surface change, run a `mode=audit` (or `mode=security` " +
+        "if quality is out of scope) consult. `audit` covers BOTH security (OWASP/CWE) and " +
+        "code quality (error handling, async correctness, idiom, simplicity, API design, " +
+        "testing gaps, observability) in one pass and tags each finding `kind: security` " +
+        "or `kind: quality`. Don't punt this to a manual review later -- the user has " +
+        "explicitly said they want both lenses on every change going forward.\n" +
         "\n" +
         "Modes: review (line-level), plan (steps + tradeoffs), debug (hypotheses), ux (user-visible " +
-        "behavior), architecture (assumptions + failure modes), security (OWASP-framed).",
+        "behavior), architecture (assumptions + failure modes), security (OWASP-framed only), " +
+        "quality (best-practices only), audit (security + quality combined in one pass).",
       inputSchema: {
         type: "object",
         additionalProperties: false,
