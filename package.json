@@ -14,5 +14,24 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "description": "Local MCP server that lets Claude Code and Codex CLI consult each other, hand off work, and share a project decision log. Dependency-free Node, stdio transport.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maferick/claude-codex-mcp.git"
+  },
+  "homepage": "https://github.com/maferick/claude-codex-mcp",
+  "bugs": {
+    "url": "https://github.com/maferick/claude-codex-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "codex",
+    "llm",
+    "agents",
+    "collaboration"
+  ],
+  "author": "Gijs van der Laken"
 }

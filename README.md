@@ -34,13 +34,13 @@ On this machine, `codex exec -` has been verified with `codex-cli 0.130.0-alpha.
 From Claude Code:
 
 ```powershell
-claude mcp add agent-collab-mcp -- node C:\Users\gijsv\agent-collab\src\index.mjs
+claude mcp add agent-collab-mcp -- node <install-dir>\src\index.mjs
 ```
 
 For Codex, add an MCP stdio server entry that runs:
 
 ```powershell
-node C:\Users\gijsv\agent-collab\src\index.mjs
+node <install-dir>\src\index.mjs
 ```
 
 Recommended project-specific environment:
